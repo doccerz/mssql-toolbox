@@ -1,0 +1,31 @@
+DECLARE @Table TABLE (ID INT IDENTITY(1,1),TABLE_NAME VARCHAR(50), COLUMN_NAME VARCHAR(50),DATA_TYPE VARCHAR(50))
+DECLARE @table_name VARCHAR(50)
+DECLARE @column_name VARCHAR(50)
+DECLARE @datatype VARCHAR(50)
+DECLARE @Count INT
+DECLARE @Max INT
+
+INSERT INTO @Table
+SELECT DISTINCT TABLE_NAME, COLUMN_NAME,DATA_TYPE FROM 
+        [FIREARM_GOLDEN_856].INFORMATION_SCHEMA.COLUMNS
+EXCEPT
+SELECT DISTINCT TABLE_NAME, COLUMN_NAME,DATA_TYPE FROM 
+        [TestGolf].INFORMATION_SCHEMA.COLUMNS
+
+SET @Count =(SELECT MAX(ID) FROM @Table t)
+SET @Max =0
+WHILE @Count > @Max
+BEGIN
+    USE [TestGolf]
+    SET @Max = @Max +1
+
+	SELECT 
+		 @table_name = TABLE_NAME,
+		 @column_name = COLUMN_NAME,
+		 @datatype = DATA_TYPE
+	FROM @Table 
+	WHERE ID = @Max
+    EXEC('ALTER TABLE '+@table_name+' ADD ' +@column_name+' '+@datatype)
+	PRINT('ALTER TABLE '+@table_name+' ADD ' +@column_name+' '+@datatype)
+END
+
